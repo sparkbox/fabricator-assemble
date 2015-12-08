@@ -355,9 +355,16 @@ var parseMaterials = function () {
 		if (!_.isEmpty(localData)) {
 			_.forEach(localData, function (val, key) {
 				// {{field}} => {{material-name.field}}
-				var regex = new RegExp('(\\{\\{[#\/]?)(\\s?' + key + '+?\\s?)(\\}\\})', 'g');
-				content = content.replace(regex, function (match, p1, p2, p3) {
-					return p1 + id.replace(/\./g, '-') + '.' + p2.replace(/\s/g, '') + p3;
+				var bracesRegex = new RegExp('(\{{2,3})([^\{]*?)(\}{2,3})', 'g');
+				var contentRegex = new RegExp('(^|[ ]|\=)('+key+')($|[ ]|\.)', 'g');
+
+
+				content = content.replace(bracesRegex, function (match, p1, p2, p3) {
+					var insideContent = p2;
+					insideContent = insideContent.replace(contentRegex, function(mm, pp1, pp2, pp3){
+						return pp1 + id.replace(/\./g, '-') + '.' + pp2.replace(/\s/g, '') + pp3;
+					});
+					return p1 + insideContent + p3;
 				});
 			});
 		}
